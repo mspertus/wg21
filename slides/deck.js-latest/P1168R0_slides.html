@@ -54,18 +54,29 @@ body .syntaxhighlighter .line {
     </section>
 
     <section class="slide">
-      <h2>Terse notation relies on type inference</h2>
-    <p>With terse notation, such as in P1141, type inference becomes more important
-        because the programmer manipulates many more objects without
-        named types</p>
-    <pre class="slide"><pre class="brush:cpp">void f(Foo x)                  // The type of x is named foo
+      <h2>Terse notation relies on unnamed types</h2>
+    <p>With terse notation, such as in P1141, objects without named types will become much more common</p>
+    <pre class="slide"><pre class="brush:cpp">void f(Foo x);                 // The type of x is named Foo
 template&lt;class T> void g(T x); // The type of x is named T
-void h(Concept auto x);        // The type of x is nameless</pre></pre>
-
+void h(Concept auto x);        // The type of x is nameless</pre></pre></section>
+<section class="slide"><h2>Unnamed types rely on type inference</h2>
+<pre class="slide"><pre class="brush:cpp">void f(Foo x)                 { optional&lt;Foo&gt; o = x; ... }
+template&lt;class T> void g(T x) { optional&lt;T&gt; o = x; ... }
+void h(Concept auto x)        { optional&lt;decltype(x)&gt; o = x; ... } </pre></pre>
+<p class="slide">Of course, all of the above functions could make use of inference</p>
+<pre class="slide"><pre class="brush:cpp">optional o = x;</pre></pre>
+<p class="slide">However, for the terse Concepts-based one, it is not just a convenience, but is
+horribly ugly to write without inference</p>
+<p class="slide"><strong style="color:red;font-size=125%">And this is only a very simple example!</strong></p>
+<ul class="slide"></ul>
     </section>
 
+
     <section class="slide">
-      <h1>Here</h1>
+<p>This is not unique to terse notation, as other modern features like lambdas and
+      better support for functional programming styles also proliferate objects
+      with nameless types</p>
+        <h1>Here</h1>
     </section>
 
     <!-- End slides. -->
