@@ -21,7 +21,7 @@
   <link rel="stylesheet" media="screen" href="themes/style/web-2.0.css">
 
   <!-- Transition theme. More available in /themes/transition/ or create your own. -->
-  <link rel="stylesheet" media="screen" href="themes/transition/horizontal-slide.css">
+  <link rel="stylesheet" media="screen" href="themes/transition/fade.css">
 
   <!-- Basic black and white print styles -->
   <link rel="stylesheet" media="print" href="core/print.css">
@@ -35,6 +35,8 @@
 <!--<script src="http://alexgorbatchev.com/pub/sh/current/scripts/shAutoloader.js" type="text/javascript"></script>-->
 <script src='http://alexgorbatchev.com/pub/sh/current/scripts/shBrushCpp.js' type='text/javascript'></script>
 <script src='ShBrushCpp.js' type='text/javascript'></script>
+     <link rel="stylesheet" href="css/style.css">
+
     <style>.syntaxhighlighter div.toolbar span a.toolbar_item{
    display: none !important;
 } 
@@ -58,7 +60,9 @@ body .syntaxhighlighter .line {
     <p>With terse notation, such as in P1141, objects without named types will become much more common</p>
     <pre class="slide"><pre class="brush:cpp">void f(Foo x);                 // The type of x is named Foo
 template&lt;class T> void g(T x); // The type of x is named T
-void h(Concept auto x);        // The type of x is nameless</pre></pre></section>
+void h(Concept auto x);        // The type of x is nameless</pre></pre>
+<p class="slide">In fact, this is not just terse notation, but other modern C++ techniques, such as
+lambdas and better support for functional programming also lead to more objects without named types</p></section>
 <section class="slide"><h2>Unnamed types rely on type inference</h2>
 <pre class="slide"><pre class="brush:cpp">void f(Foo x)                 { optional&lt;Foo&gt; o = x; ... }
 template&lt;class T> void g(T x) { optional&lt;T&gt; o = x; ... }
@@ -68,17 +72,100 @@ void h(Concept auto x)        { optional&lt;decltype(x)&gt; o = x; ... } </pre><
 <p class="slide">However, for the terse Concepts-based one, it is not just a convenience, but is
 horribly ugly to write without inference</p>
 <p class="slide"><strong style="color:red;font-size=125%">And this is only a very simple example!</strong></p>
-<ul class="slide"></ul>
     </section>
 
-
+<section class="slide">
+    <h2>What about a less simple example?</h2>
+<p>Even straightforward conceptized functions can easily become virtually incomprehensible without
+    inferencing</p>
+<pre class="slide"><pre class="brush:cpp">
+template&lt;class CharT, class Traits&gt;
+auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
+  -&gt; pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;&gt;
+{
+  Point&lt;decltype(c.x_min())&gt; top_left{c.x_min(), c.y_max()};
+  screen->line&lt;decltype(p.x)&gt;(p, {c.x_min(), c.y_max()});
+  logger &lt;&lt; "Drew line\n";
+  
+  pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;
+     cp(c.ctrl_pts.begin(), c.ctrl_pts.end(), mem_res);
+  logger &lt;&lt; "Got control points: ";
+  // Hard to specify ostream_iterator template args
+  copy(cp.begin(), cp.end(), 
+       ostream_iterator&lt;decltype(cp[0]),
+	                    typename decltype(logger)::char_type,
+	                    typename decltype(logger)::traits_type&gt;(logger, ", "));
+  return {c, cp };
+};</pre></pre>
+<p class="slide">We'll come back to this one in a bit</p>
+</section>
+<section class="slide"><h2>Goal 1: Improved type inferencing</h2>
+<p>As the above slides indicate, the better (constrained) type inferencing works,
+the better the experience with terse notation will be.</p>
+<p class="slide">In our view, there are two halves to constrained type inferencing</p>
+    <ol><li class="slide"><strong>Constrained use of objects:</strong> This is provided by terse notation itself,
+        which makes it easy to constrain what objects you are willing to use</li>
+        <li class="slide"><strong>Constrained creation of objects:</strong> This is provided by class template
+            argument deduction, the subject of this paper</li></ol>
+</section>
+<section class="slide"><h2>Goal 2: Increased consistency</h2>
+<p>As pointed out in P1141R1, it seems unnatural and inconsistent to allow</p>
+    <pre><pre class="brush:cpp">tuple x = foo();</pre></pre>
+<p>but not allow</p>
+    <pre><pre class="brush:cpp">Constraint x = f2();</pre></pre>
+<p>Likewise, it seems equally unnatural and inconsistent to allow</p>
+    <pre><pre class="brush:cpp">Constraint x = f2();</pre></pre>
+<p>but not allow</p>
+   <pre><pre class="brush:cpp">tuple auto x = foo();</pre></pre>
+</section>
+<section class="slide"><h2>Is this a problem?</h2>
+<p>It doesn't need to be, and can even have some advantages</p>
+<p>We just need to do it right</p><p>It is of course possible to construct examples where decltypes are
+still needed, but...</p></section>
+      
+   <section class="slide"> <h2>Remove what should be inferenced</h2>
+<pre class="slide"><pre class="brush:cpp">// Even straightforward code is incomprehensible without CTAD
+<del>template&lt;class CharT, class Traits&gt;</del>
+auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
+  -&gt; pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;&gt;
+{
+  Point&lt;decltype(c.x_min())&gt; top_left{c.x_min(), c.y_max()};
+  screen->line&lt;decltype(p.x)&gt;(p, {c.x_min(), c.y_max()});
+  logger &lt;&lt; "Drew line\n";
+  
+  pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;
+     cp(c.ctrl_pts.begin(), c.ctrl_pts.end(), mem_res);
+  logger &lt;&lt; "Got control points: ";
+  // Hard to specify ostream_iterator template args
+  copy(cp.begin(), cp.end(), 
+       ostream_iterator&lt;decltype(cp[0]),
+	                    typename decltype(logger)::char_type,
+	                    typename decltype(logger)::traits_type&gt;(logger, ", "));
+  return {c, cp };
+};</pre></pre>
+</section>
     <section class="slide">
 <p>This is not unique to terse notation, as other modern features like lambdas and
       better support for functional programming styles also proliferate objects
       with nameless types</p>
         <h1>Here</h1>
     </section>
+<section class="slide"><h2>Thoughts: What will terse programming look like?</h2>
+<p class="slide">Since we have terse notation, we should have better inferencing.
+    As has been discussed many times, type inferencing has many well-known benefits</p>
+    <ul> <li class="slide">No need to write complex and redundant template boilerplate</li>
+    <li class="slide">Less visual clutter with redundant information and extraneous notations</li>
+    <li class="slide">More flexible code due to loose coupling (E.g., Changing the type of a vector
+        doesn't require you to change how you call <code>sort</code> on the vector)</li>
+    <li class="slide">Can give the ease of programming in scripting languages like Python
+        with the static type-safety essential for large programs</li></ul>
+<p class="slide">and disadvantages:</p>
 
+<ul><li class="slide">The programmer may be confused about how they can use an object
+or what template specialization was selected</li>
+<li class="slide">Error messages are often confusing and non-local</li></ul>
+    <p class="slide"><strong>Note:</strong> Objects with unnamed types, like in terse notation (and lambdas, ranges, etc.)
+    make t</p></section>
     <!-- End slides. -->
 
     <!-- Begin extension snippets. Add or remove as needed. -->

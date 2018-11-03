@@ -1,0 +1,75 @@
+.all {
+    -webkit-animation-play-state: paused; /* Safari 4.0 - 8.0 */
+    animation-play-state: paused;
+}
+.shrink_text {
+    display: inline-block;
+ /*   color:red; */
+    -webkit-animation-name:animate_fade,animate_shrink_text;
+    -webkit-animation-duration:3s,2s;
+   -webkit-animation-delay:1s,4s;
+  animation-fill-mode: forwards;}
+.grow_text {
+    display: inline-block;
+ /*   color:blue; */
+    -webkit-animation-name:grow;
+    -webkit-animation-duration:3s;
+    -webkit-animation-timing-function:ease-in;
+    -webkit-animation-delay:0s;
+  animation-fill-mode: forwards;}
+.shrink_line {
+    display: block;
+/*    color:red; */
+    -webkit-animation-name:animate_fade,animate_shrink_text;
+    -webkit-animation-duration:3s,2s;
+   -webkit-animation-delay:1s,4s;
+  animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes animate_fade {
+    from {
+	  color:normal;
+      width:normal;
+      height:normal;
+      line-height:normal;
+      font-size:normal;
+    }
+    to {
+      width:normal;
+      height:normal;
+	  color:white;
+      line-height:normal;
+      font-size:normal;
+    }
+}
+
+ @-webkit-keyframes animate_shrink_text {
+     from {
+      width:normal;
+      height:normal;
+	  color:white;
+      line-height:normal;
+      font-size:normal;
+    }
+  	to {
+      width:0;
+      height:0px;
+	  color:white;
+      line-height:0;
+      font-size:0
+    }
+}
+@-webkit-keyframes grow {
+    from {
+      width:0;
+      height:0px;
+      line-height:0;
+      font-size:0
+    }
+   to {
+      width:normal;
+      height:normal;
+      line-height:normal;
+      font-size:normal;
+    }
+}

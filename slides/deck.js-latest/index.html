@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>A Pen by  mspertus</title>
+  
+  
+  
+      <link rel="stylesheet" href="css/style.css">
+
+  
+</head>
+
+<body>
+
+  <div class="all"><tt><div class="shrink_line">template&lt;class CharT, class Traits></div>
+<div class="grow_text">pair&nbsp;</div>auto f(Curve auto &c, basic_ostream&lt;charT, Traits> logger)<br>
+<div class="shrink_line">&nbsp;&nbsp;  -> pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type>></div>
+{<br>
+  &nbsp;&nbsp;Point<div class="shrink_text">&lt;decltype(c.x_min())></div> top_left{c.x_min(), c.y_max()};<br>
+  &nbsp;&nbsp;screen->line<div class="shrink_text">&lt;decltype(p.x)></div>(p, {c.x_min(), c.y_max()});<br>
+&nbsp;&nbsp;logger &lt;&lt; "Drew line\n";<br>
+   <br>
+  &nbsp;&nbsp;pmr::vector<div class="shrink_text">&lt;typename decltype(c.ctrl_pts)::value_type></div> cp(c.ctrl_pts.begin(), c.ctrl_pts.end(), mem_res);<br>
+&nbsp;&nbsp;logger &lt;&lt; "Got control points: ";<br>
+&nbsp;&nbsp;copy(cp.begin(), cp.end(), <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ostream_iterator&lt;decltype(cp[0])<div class="shrink_text">,</div><div class="grow_text">&gt;(logger, ", "))</div><br>
+<div class = "shrink_line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typename decltype(logger)::char_type,</div>
+<div class = "shrink_line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typename decltype(logger)::traits_type>(logger, ", "));</div>
+&nbsp;&nbsp;return {c, cp };<br>
+};<br>
+  </tt>
+  </div>
+  
+
+</body>
+
+</html>

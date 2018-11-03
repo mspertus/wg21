@@ -215,7 +215,7 @@ h1, .vcenter {
 }
 
 h2 {
-  font-size: 2.25em;
+  font-size: 1.75em;
   font-weight: bold;
   padding-top: .5em;
   margin: 0 0 .66666em 0;
@@ -431,7 +431,7 @@ a:hover, a:focus {
 
 .deck-container {
   font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
-  font-size: 1.75em;
+  font-size: 2em;
   background: #f4fafe;
   /* Old browsers */
   background: -moz-linear-gradient(top, #f4fafe 0%, #ccf0f0 100%);
@@ -454,7 +454,7 @@ a:hover, a:focus {
 }
 
 .slide .deck-before, .slide .deck-previous {
-  opacity: 1;
+  opacity: 1.0;
 }
 .slide .deck-before:not(.deck-child-current) .deck-before, .slide .deck-before:not(.deck-child-current) .deck-previous, .slide .deck-previous:not(.deck-child-current) .deck-before, .slide .deck-previous:not(.deck-child-current) .deck-previous {
   opacity: 1;
