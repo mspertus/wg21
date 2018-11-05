@@ -78,9 +78,9 @@ horribly ugly to write without inference</p>
     <h2>What about a less simple example?</h2>
 <p>Even straightforward conceptized functions can easily become virtually incomprehensible without
     inferencing</p>
-<pre class="slide"><pre class="brush:cpp">
+<small><pre class="slide"><pre class="brush:cpp">
 template&lt;class CharT, class Traits&gt;
-auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
+auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; &amp;logger)
   -&gt; pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;&gt;
 {
   Point&lt;decltype(c.x_min())&gt; top_left{c.x_min(), c.y_max()};
@@ -96,7 +96,7 @@ auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
 	                    typename decltype(logger)::char_type,
 	                    typename decltype(logger)::traits_type&gt;(logger, ", "));
   return {c, cp };
-};</pre></pre>
+};</pre></pre></small>
 <p class="slide">We'll come back to this one in a bit</p>
 </section>
 <section class="slide"><h2>Goal 1: Improved type inferencing</h2>
@@ -106,27 +106,68 @@ the better the experience with terse notation will be.</p>
     <ol><li class="slide"><strong>Constrained use of objects:</strong> This is provided by terse notation itself,
         which makes it easy to constrain what objects you are willing to use</li>
         <li class="slide"><strong>Constrained creation of objects:</strong> This is provided by class template
-            argument deduction, the subject of this paper</li></ol>
+            argument deduction
+        </li></ol>
 </section>
+<section class="slide">
+    <h2>Don't we already have CTAD?</h2>
+<p>You might be wondering that if constrained usage is solved by terse
+    notation and constrained creation is solved by class template argument deduction,
+    aren't we done?</p>
+    <p class="slide">Indeed, our original example with <code>optional</code> works just
+    fine with C++17 class template argument deduction. However, </p>
+    <ul><li class="slide">CTAD in C++17 was limited
+    to simple declarations of automatic/static  variables of class type while
+    deferring (usually intentionally) to the next cycle as we consider in separate papers, such as
+    <ul><li>aggregates, type aliases, inherited constructors, and partial template argument lists (P1021R1)</li>
+    <li>deduction from function template arguments (P1167R0)</li>
+    <li>Enabling CTAD for creating objects on the heap (P1069R0)</li></ul>
+    <p>In this paper, we confine ourselves to our example of how they improve terse notation</p></li>
+   
+    <li class="slide">There are unnecessary gratuitous inconsistencies between terse
+        notation and class template argument deduction that both limit functionality
+        and confuse programmers, which leads us to...</li></ul>
+      </section>
 <section class="slide"><h2>Goal 2: Increased consistency</h2>
 <p>As pointed out in P1141R1, it seems unnatural and inconsistent to allow</p>
-    <pre><pre class="brush:cpp">tuple x = foo();</pre></pre>
+    <pre>tuple x = foo();</pre>
 <p>but not allow</p>
-    <pre><pre class="brush:cpp">Constraint x = f2();</pre></pre>
+    <pre>Constraint x = f2();</pre>
 <p>Likewise, it seems equally unnatural and inconsistent to allow</p>
-    <pre><pre class="brush:cpp">Constraint x = f2();</pre></pre>
+    <pre>Constraint auto x = f2();</pre>
 <p>but not allow</p>
-   <pre><pre class="brush:cpp">tuple auto x = foo();</pre></pre>
+   <pre>tuple auto x = foo();</pre>
+<p>Which leads us to...</p>
 </section>
-<section class="slide"><h2>Is this a problem?</h2>
-<p>It doesn't need to be, and can even have some advantages</p>
-<p>We just need to do it right</p><p>It is of course possible to construct examples where decltypes are
-still needed, but...</p></section>
-      
-   <section class="slide"> <h2>Remove what should be inferenced</h2>
-<pre class="slide"><pre class="brush:cpp">// Even straightforward code is incomprehensible without CTAD
-<del>template&lt;class CharT, class Traits&gt;</del>
-auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
+<section class="slide">
+    <h2>Our proposal</h2>
+<p>Our proposal is simply to allow &ldquo;class template name&rdquo; in the same declarations as &ldquo;concept name&rdquo;
+(or at the minimum, </p>
+<p>In particular, in addition to the example of the last slide, it seems weird to allow</p>
+<pre>Constraint1 auto f(Constraint2 auto X);</pre>
+<p>but not allow</p>
+<pre>tuple auto f(tuple auto x);</pre>
+<p>In fact, more than just seeming weird, let's look at our example</p>
+</section>
+<section class="slide"><h2>Our example</h2>
+<p>In particular, it is confusing in our original example to have to find some inferenced arguments
+in the <tt>template</tt> declaration and some in the argument list</p>
+<pre><pre class="brush:cpp">// Why can Curve be terse but not logger, when both can be &ldquo;terse&rdquo; as variables?
+template&lt;class CharT, class Traits&gt;
+auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; &amp;logger)
+  -&gt; pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;&gt;;</pre></pre>
+<p>With the proposal, the <tt>auto</tt> sigil clearly indicates that all arguments and the return type are inferenced</p>
+<pre><pre class="brush:cpp">pair auto f(Curve auto &amp;c, basic_ostream &amp;logger);</pre></pre>
+      </section>
+   <section class="slide"> <h2>Full example</h2>
+<p>Returning to the topic of how terse notation produces many objects with unnamed types,
+    the other half of the &ldquo;How CTAD makes terse notation soar&rdquo; story
+    is that function bodies also benefit in an integral &ldquo;more than
+just a convenience&rdquo; way from fleshing
+out of class template argument deduction as in C++17 CTAD, P1021R0, P1069R0, and P1167R0 where
+       the virtually incomprehensible</p>
+<pre><pre class="brush:cpp">template&lt;class CharT, class Traits&gt;
+auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; &amp;logger)
   -&gt; pair&lt;decltype(c), pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;&gt;
 {
   Point&lt;decltype(c.x_min())&gt; top_left{c.x_min(), c.y_max()};
@@ -136,7 +177,7 @@ auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
   pmr::vector&lt;typename decltype(c.ctrl_pts)::value_type&gt;
      cp(c.ctrl_pts.begin(), c.ctrl_pts.end(), mem_res);
   logger &lt;&lt; "Got control points: ";
-  // Hard to specify ostream_iterator template args
+
   copy(cp.begin(), cp.end(), 
        ostream_iterator&lt;decltype(cp[0]),
 	                    typename decltype(logger)::char_type,
@@ -144,28 +185,53 @@ auto f(Curve auto &amp;c, basic_ostream&lt;charT, Traits&gt; logger)
   return {c, cp };
 };</pre></pre>
 </section>
-    <section class="slide">
-<p>This is not unique to terse notation, as other modern features like lambdas and
-      better support for functional programming styles also proliferate objects
-      with nameless types</p>
-        <h1>Here</h1>
-    </section>
-<section class="slide"><h2>Thoughts: What will terse programming look like?</h2>
+  <section class="slide"> <h2>Full example (continued)</h2>
+<p>becomes straightforward when the &ldquo;business logic&rdquo; is not obscured by
+    extraneous <code>decltype</code> boilerplate</p>
+<pre><pre class="brush:cpp">pair auto f(Curve auto &amp;, basic_ostream &amp;logger)
+{
+  Point top_left{c.x_min(), c.y_max()};
+  screen->line(p, {c.x_min(), c.y_max()});
+  logger &lt;&lt; "Drew line\n";
+  
+  pmr::vector cp(c.ctrl_pts.begin(), c.ctrl_pts.end(), mem_res);
+  logger &lt;&lt; "Got control points: ";
+
+  copy(cp.begin(), cp.end(), 
+       ostream_iterator&lt;decltype(cp[0])&gt;(logger, ", "));
+  return {c, cp };
+};</pre></pre>
+<p>While we know one can construct some examples where decltype is still necessary
+    (usually for intrinsic, nondeducible reasons), 
+    we hope this motivates not only this proposal but our overall claim that
+the better inferencing works for creating class template objects, the better the experience with
+    terse notation will be</p></section>
+<section class="slide"><h2>How it works</h2> 
+<ul><li>allow <tt>auto</tt> sigils for class templates wherever it is allowed after a concept name</li>
+<li>If it appears followed by auto in a function argument (or any place where Concept auto results in a template),
+    make the function into a function template with
+    the parameters of the class template and deduce from the arguments</li>
+<li>If it does not imply a template (e.g., a variable declaration or function return type), perform
+ordinary class template argument deduction</li></ul>
+</section>
+<!-- By getting rid of all of the extraneous crap, the code becomes much clearer -->
+<!-- <section class="slide"><h2>Is this all a good thing?</h2>
 <p class="slide">Since we have terse notation, we should have better inferencing.
     As has been discussed many times, type inferencing has many well-known benefits</p>
     <ul> <li class="slide">No need to write complex and redundant template boilerplate</li>
     <li class="slide">Less visual clutter with redundant information and extraneous notations</li>
     <li class="slide">More flexible code due to loose coupling (E.g., Changing the type of a vector
         doesn't require you to change how you call <code>sort</code> on the vector)</li>
+        <li>Separation of type from interface is not just for runtime-dispatch. It now works for compile-time</li>
     <li class="slide">Can give the ease of programming in scripting languages like Python
         with the static type-safety essential for large programs</li></ul>
-<p class="slide">and disadvantages:</p>
+<p class="slide">and disadvantages are largely mooted by constraints:</p>
 
 <ul><li class="slide">The programmer may be confused about how they can use an object
 or what template specialization was selected</li>
 <li class="slide">Error messages are often confusing and non-local</li></ul>
     <p class="slide"><strong>Note:</strong> Objects with unnamed types, like in terse notation (and lambdas, ranges, etc.)
-    make t</p></section>
+    make t</p></section>-->
     <!-- End slides. -->
 
     <!-- Begin extension snippets. Add or remove as needed. -->
