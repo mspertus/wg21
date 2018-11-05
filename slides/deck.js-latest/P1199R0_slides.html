@@ -163,9 +163,8 @@ concept bool inherits_from_Shape = is_convertible_v&lt;T *, Shape *>;</pre></pre
     of <code>Shape</code> within the body are followed by <code>auto</code></li>
     <li class="slide"><pre>bool is_convex(Shape auto &amp;s) {
   <del>Shape *x = new Shape;</del> // Ill-formed! Assumes Shape is a class
-  pair p(s, 7); // OK. Does not assume <code>Shape</code> is a class
-  Shape auto &amp;s2 = convex_hull(s); // Also ok
-  ...
+  Shape auto &amp;s2 = convex_hull(s); // OK. Does not assume <code>Shape</code> is a class
+  return s2 == s;
 }</pre></li></ul></section>
       <section class="slide"><h2>Putting it together</h2>
 <p>To sum up, our proposal is simply</p>
