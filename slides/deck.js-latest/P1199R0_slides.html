@@ -72,16 +72,16 @@ body .syntaxhighlighter .line {
       <p>Indeed, the Concepts TS goes <em>all in</em> on unifying declarations:</p>
       <pre><pre class="brush:cpp">bool is_convex(Shape &amp;s); // Valid whether Shape is a class or a concept</pre></pre>
       <p class="slide">Unfortunately, it was soon discovered that unification was not so simple</p>
-      <ul><li class="slide">How parameters are passed with universal references depend on whether
+      <ul><li class="slide">How parameters are passed with <code>&amp;&amp;</code> depends on whether
           <code>Shape</code> is a class or a concept</li>
         <li class="slide">Usage of <code>is_convex</code> 
             depends on whether <code>Shape</code>
           is a class or a concept (e.g., is <code>&amp;is_convex</code> valid?)</li>
           <li class="slide">The body of <code>is_convex</code> will differ greatly depending
         on whether <code>Shape</code> is a class or a concept</ul></section>
-      <section class="slide"><p>If all we can achieve is the appearance of unification without
+      <section class="slide"><h3>If all we can achieve is the appearance of unification without
           the reality of unification, we run the risk of just having a sort of Potemkin's village
-          of unification</p>
+          of unification</h3>
       <img src="https://i1.wp.com/madmikesamerica.com/wp-content/uploads/2017/01/potemkin-village.jpg?ssl=1"/></section>
       <section class="slide"><h2>What would unification look like?</h2>
       <p>Of course, it would solve all of the above problems 😃</p>
@@ -90,7 +90,7 @@ body .syntaxhighlighter .line {
         <li>Usage of <code>is_convex</code> 
             would be the same whether <code>Shape</code>
           is a class or a concept</li>
-          <li>The body of <code>is_convex</code> be the same  whether <code>Shape</code> is a class or a concept</ul>
+          <li>The body of <code>is_convex</code> would be the same  whether <code>Shape</code> is a class or a concept</ul>
       <h3 class="slide">I claim these can all be achieved</h3>
       <p class="slide">Spoiler alert: I <em>love</em> P1141</p></section>
       <section class="slide"><h2>Motivating example</h2>
@@ -114,7 +114,8 @@ body .syntaxhighlighter .line {
           whether <code>shape</code> is an OO base class or a generic concept</h3>
       </section>
       <section class="slide"><h2>The key idea</h2>
-      <ul><li class="slide">The crucial observation is that P1141 allows us to label
+      <ul><li class="slide">The crucial insight to writing such &ldquo;class/concept agnostic code&rdquo;
+          is that P1141 allows us to label
           that a declaration is to be deduced 
           <pre><pre class="brush:cpp">bool is_convex(Shape auto &amp;s); // Shape is deduced</pre></pre></li>
           <li class="slide">P1141 tells what this means if <code>Shape</code>
@@ -134,24 +135,24 @@ body .syntaxhighlighter .line {
           concept <code>inherits_from_Shape</code> by 
           <pre><pre class="brush:cpp">template&lt;typename T> 
 concept bool inherits_from_Shape = is_convertible_v&lt;T *, Shape *>;</pre></pre>
-          and rewrite <pre><pre class="brush:cpp">bool is_convex(Shape auto &amp;s);</pre></pre>
+          and we propose that the compiler rewrite <pre><pre class="brush:cpp">bool is_convex(Shape auto &amp;s);</pre></pre>
           as the constrained concepts declaration
           <pre><pre class="brush:cpp">bool is_convex(inherits_from_Shape auto &amp;s);</pre></pre></li></ul></section>
 <section class="slide"><h2>What does that give us?</h2>
 <ul><li class="slide">Actually, just what we need!</li>
 <li class="slide">If <code>Shape</code> is a class
     <pre><pre class="brush:cpp">bool is_convex(Shape auto &amp;s);</pre></pre>
-    can be called with any object that inherits from <code>Shape</code>, just the same as
-    <code><pre><pre class="brush:cpp">bool is_convex(Shape auto &amp;s);</pre></pre></code></li>
-<li class="slide">But since it has been reinterpret in terms of the <code>inherits_from_Shape</code>
-    concept, it is a function template, interprets &amp;&amp; as a universal reference, etc.
+    can be called with any object that inherits from <code>Shape</code>, just the same as the familiar
+    <code><pre><pre class="brush:cpp">bool is_convex(Shape &amp;s);</pre></pre></code></li>
+<li class="slide">But since it has been reinterpreted as the <code>inherits_from_Shape</code>
+    concept, it is a function template, treats &amp;&amp; as a universal reference, etc.
     just like it would if <code>Shape</code> were a concept!</li>
 <li class="slide">This means that if later we realize we should have made <code>Shape</code> a concept with the
     same methods (e.g., for 
     better performance), the usage of <code>is_convex</code> doesn't change at all!</li>
 <li class="slide">In other words, we have successfully unified the signature!</li></ul>
 </section>
-<section class="slide"><h2>What about the body?</h2>
+<section class="slide"><h2>What about the function body?</h2>
 <ul><li class="slide">Of course, if we riddle the body of <code>is_convex</code> with the assumption
     that <code>Shape</code> is a class, then we will be back to having a &ldquo;Potemkin Village Unification&rdquo;</li>
 <li class="slide">So we just do exactly the same thing for the body we did for the signature!</li>
@@ -163,14 +164,53 @@ concept bool inherits_from_Shape = is_convertible_v&lt;T *, Shape *>;</pre></pre
     <li class="slide"><pre>bool is_convex(Shape auto &amp;s) {
   <del>Shape *x = new Shape;</del> // Ill-formed! Assumes Shape is a class
   pair p(s, 7); // OK. Does not assume <code>Shape</code> is a class
-  Shape auto &amp; s2 = convex_hull(s); // Also ok
+  Shape auto &amp;s2 = convex_hull(s); // Also ok
   ...
 }</pre></li></ul></section>
-      <section slide="class"><h2>Putting it together</h2>
+      <section class="slide"><h2>Putting it together</h2>
 <p>To sum up, our proposal is simply</p>
-<ul></ul></section>
-    <!-- End slides. -->
-
+<ul><li>Wherever <code><em>classname</em> auto</code> occurs,
+    replace it with <code><em>inherits_from_classname</em> auto</code></li>
+  <li>If <code><em>classname</em> auto</code> occurs in a function signature,
+    all occurrences of <code><em>classname</em></code> in the body must be followed by
+    <code>auto</code> (this may be relaxed if desired)</li></ul>
+          <div class="slide"><p>That's pretty much it. </p></div> 
+          <p class="slide">Let's illustrate with another example</p></section>
+     <section class="slide"><h2>Another example</h2>
+      <p>Here is a function taking two arguments</p>
+      <pre><pre class="brush:cpp">// Want to work identically whether Shape is a concept or type
+bool sameShapeMaybeDifferentPosition(Shape auto const &amp;s1, Shape auto const &amp;s2) {   
+   Shape auto const &amp;s1Translated = s1 - s1.lower_left();
+   Shape auto const &amp;s2Translated = s2 - s2.lower_left();
+   return s1Translated == s2Translated;
+}</pre></pre>
+         <p><strong>Notes:</strong></p>
+<ul><li>This code works equally well whether <code>Shape</code> is a base class with virtual
+    functions or a concept requiring the same methods, so it is easy to switch between them to tune
+    the tradeoffs between compile-time and runtime dispatch or if circumstances change later</li>
+    <li>This example only works because of independent binding (another reason I prefer P1141 over
+    the concepts TS) because in object-oriented programming, you could compare two different shapes (e.g.,
+    a rectangle and a triangle) as long as they both inherit from <code>Shape</code></li></ul></section>
+      <section class="slide"><h2>Notes</h2>
+<ul><li>With this proposal, uses of <code>C auto</code> are agnostic
+    as to whether <code>C</code> is a class with virtual functions or a concept specifying
+    the same semantics</li>
+    <li>Therefore, we believe that it achieves all of the goals outlined at the
+    beginning of this presentation, providing semantic unification along with syntactic unification
+    (no Potemkin village here!)</li>
+    <li>Of course, if you know that <code>C</code> will always be a class and have no interest in
+    unification, you can simply ignore this proposal since it only applies if <code>C</code> is 
+    followed by <code>auto</code>
+    <pre><pre class="brush:cpp">void f(C c); // Works as always. Not a function template</pre></pre><p>so
+        there is no impact when not used</p></li>
+    <li>As the details of P1141 are finalized, we would encourage that the <code>auto</code> sigil
+          be allowed (but not necessarily required) after a concept name as much as possible within a function body
+          to maximize the functionality of class/concept agnostic code</li>
+          <li>We should make sure that writing code for concepts is not too much harder than
+    writing code for classes, minimizing the frustration of writing class/concept agnostic code
+<ul><li>Of course, that is already important for concepts anyway!</li>
+<li>P1168R0 gives our approach to addressing this (whether or not the present paper is accepted)</li></ul></li></ul></section>
+    <!-- End slides. 
     <!-- Begin extension snippets. Add or remove as needed. -->
 
     <!-- deck.navigation snippet -->
