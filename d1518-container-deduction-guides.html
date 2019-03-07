@@ -2,7 +2,7 @@
  <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
-  <title>D1518R0: Stop overconstraining allocators in deduction guides</title>
+  <title>D1518R0: Stop overconstraining allocators in container deduction guides</title>
 <style data-fill-with="stylesheet">/******************************************************************************
  *                   Style sheet for the W3C specifications                   *
  *
@@ -1441,7 +1441,7 @@ pre .property::before, pre .property::after {
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"></p>
-   <h1 class="p-name no-ref" id="title">D1518R0<br>Stop overconstraining allocators in deduction guides</h1>
+   <h1 class="p-name no-ref" id="title">D1518R0<br>Stop overconstraining allocators in container deduction guides</h1>
    <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Draft Proposal, <time class="dt-updated" datetime="2019-02-22">2019-02-22</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
@@ -1476,14 +1476,14 @@ pre .property::before, pre .property::after {
   <nav data-fill-with="table-of-contents" id="toc">
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
    <ol class="toc" role="directory">
-    <li><a href="#overconst1"><span class="secno">1</span> <span class="content">Stop overconstraining allocators that <em>do not</em> participate in deduction</span></a>
+    <li><a href="#overconst1"><span class="secno">1</span> <span class="content">Stop overconstraining allocators that do not participate in deduction</span></a>
      <ol class="toc">
       <li><a href="#problem1"><span class="secno">1.1</span> <span class="content">The problem</span></a>
       <li><a href="#explanation1"><span class="secno">1.2</span> <span class="content">The explanation</span></a>
       <li><a href="#solution1"><span class="secno">1.3</span> <span class="content">The solution</span></a>
      </ol>
        </li>
-    <li><a href="#overconst2"><span class="secno">2</span> <span class="content">Stop overconstraining allocators that <em>should not</em> participate in deduction</span></a>
+    <li><a href="#overconst2"><span class="secno">2</span> <span class="content">Stop deducing from allocators that should not participate in deduction</span></a>
      <ol class="toc">
       <li><a href="#problem2"><span class="secno">2.1</span> <span class="content">The problem</span></a>
       <li><a href="#explanation2"><span class="secno">2.2</span> <span class="content">The explanation</span></a>
@@ -1504,7 +1504,7 @@ pre .property::before, pre .property::after {
    </ol>
   </nav>
   <main>
-   <h2 class="heading settled" data-level="1" id="overconst1"><span class="secno">1. </span><span class="content">Stop overconstraining allocators that <em>do not</em> participate in deduction</span><a class="self-link" href="#overconst1"></a></h2>
+   <h2 class="heading settled" data-level="1" id="overconst1"><span class="secno">1. </span><span class="content">Stop overconstraining allocators that do not participate in deduction</span><a class="self-link" href="#overconst1"></a></h2>
   <h3 class="heading settled" data-level="1" id="overconstr"><span class="secno">1.1 </span><span class="content">The problem</span><a class="self-link" href="#problem"></a></h3>
    <p>Consider this code:</p>
 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
@@ -1552,7 +1552,7 @@ we shouldn’t interrogate it any more closely. Trust the <code class="highlight
    <p class="note" role="note"><span>Note:</span> No container adaptor deduction guide has an <code class="highlight"><c- n>Allocator</c-></code> template parameter without also having
 a <code class="highlight"><c- n>Container</c-></code> template parameter.</p>
 
-   <h2 class="heading settled" data-level="2" id="overconst2"><span class="secno">2. </span><span class="content">Stop overconstraining allocators that <em>should not</em> participate in deduction</span><a class="self-link" href="#overconst2"></a></h2>
+   <h2 class="heading settled" data-level="2" id="overconst2"><span class="secno">2. </span><span class="content">Stop deducing from allocators that should not participate in deduction</span><a class="self-link" href="#overconst2"></a></h2>
    <h2 class="heading settled" data-level="2.1" id="problem2"><span class="secno">2.1.</span><span class="content">The problem</span><a class="self-link" href="#problem2"></a></h2>
 Consider the following code:
 	 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
