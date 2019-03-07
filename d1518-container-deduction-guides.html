@@ -1598,7 +1598,7 @@ We’ve deduced conflicting types for <code class="highlight"><c- n>Allocator</c
 was the primary author. If we’d thought of these cases at the time, this is how we would have
 done these deduction guides from the beginning.</p>
      <h3 class="heading settled" data-level="3.2" id="solution-vector-option1"><span class="secno">3.2. </span><span class="content">How to fix the containers (option 1)</span><a class="self-link" href="#solution-vector-option1"></a></h3>
-   <p>If we were first defining the containers today, the natural approach would simply be for the constructors to state which arguments should be considered deducible,
+   <p>If we were introducing containers from scratch today, the natural approach would simply be for the constructors to state which arguments should be considered deducible,
 	   just like any other function templates:
 For example, modify <a href="http://eel.is/c++draft/deque.overview">[deque.overview</a>] as follows:</p>
    <p><small></small></p>
