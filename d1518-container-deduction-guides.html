@@ -1476,21 +1476,26 @@ pre .property::before, pre .property::after {
   <nav data-fill-with="table-of-contents" id="toc">
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
    <ol class="toc" role="directory">
-    <li><a href="#problem"><span class="secno">1</span> <span class="content">The problem</span></a>
-    <li>
-     <a href="#explanation"><span class="secno">2</span> <span class="content">The explanation</span></a>
+    <li><a href="#overconst1"><span class="secno">1</span> <span class="content">Stop overconstraining allocators that <em>do not</em> participate in deduction</span></a>
      <ol class="toc">
-      <li><a href="#explanation-vector"><span class="secno">2.1</span> <span class="content">How deduction fails for <code class="highlight"><c- n>vector</c-></code></span></a>
-      <li><a href="#explanation-unordered-set"><span class="secno">2.2</span> <span class="content">How deduction succeeds for <code class="highlight"><c- n>unordered_set</c-></code></span></a>
-      <li><a href="#explanation-stack"><span class="secno">2.3</span> <span class="content">How deduction fails for <code class="highlight"><c- n>stack</c-></code></span></a>
+      <li><a href="#problem1"><span class="secno">1.1</span> <span class="content">The problem</span></a>
+      <li><a href="#explanation1"><span class="secno">1.2</span> <span class="content">The explanation</span></a>
+      <li><a href="#solution1"><span class="secno">1.3</span> <span class="content">The solution</span></a>
      </ol>
-    <li>
-     <a href="#solution"><span class="secno">3</span> <span class="content">The solution</span></a>
+       </li>
+    <li><a href="#overconst2"><span class="secno">2</span> <span class="content">Stop overconstraining allocators that <em>should not</em> participate in deduction</span></a>
      <ol class="toc">
-      <li><a href="#solution-stack"><span class="secno">3.1</span> <span class="content">How to fix the container adaptors</span></a>
-      <li><a href="#solution-vector-option1"><span class="secno">3.2</span> <span class="content">How to fix the containers (option 1)</span></a>
-      <li><a href="#solution-vector-option2"><span class="secno">3.3</span> <span class="content">How to fix the containers (option 2)</span></a>
-     </ol>
+      <li><a href="#problem2"><span class="secno">2.1</span> <span class="content">The problem</span></a>
+      <li><a href="#explanation2"><span class="secno">2.2</span> <span class="content">The explanation</span></a>
+      <li><a href="#solution2"><span class="secno">2.3</span> <span class="content">The solution</span></a>
+          <ol class="toc">
+       <li><a href="#option1"><span class="secno">2.3.1</span> <span class="content">Wording option 1</span></a>
+      <li><a href="#option2"><span class="secno">2.3.2</span> <span class="content">Wording option 2</span></a>
+          </ol>
+     <li><a href="#implementation"><span class="secno">2.4</span> <span class="content">Implementation note</span></a>
+      </ol>
+       
+       </li>
     <li>
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
@@ -1499,7 +1504,7 @@ pre .property::before, pre .property::after {
    </ol>
   </nav>
   <main>
-   <h2 class="heading settled" data-level="1" id="overconst1"><span class="secno">1. </span><span class="content">Stop overconstraining allocators that do not participate in deduction</span><a class="self-link" href="#overconst1"></a></h2>
+   <h2 class="heading settled" data-level="1" id="overconst1"><span class="secno">1. </span><span class="content">Stop overconstraining allocators that <em>do not</em> participate in deduction</span><a class="self-link" href="#overconst1"></a></h2>
   <h3 class="heading settled" data-level="1" id="overconstr"><span class="secno">1.1 </span><span class="content">The problem</span><a class="self-link" href="#problem"></a></h3>
    <p>Consider this code:</p>
 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
@@ -1547,7 +1552,7 @@ we shouldn’t interrogate it any more closely. Trust the <code class="highlight
    <p class="note" role="note"><span>Note:</span> No container adaptor deduction guide has an <code class="highlight"><c- n>Allocator</c-></code> template parameter without also having
 a <code class="highlight"><c- n>Container</c-></code> template parameter.</p>
 
-   <h2 class="heading settled" data-level="2" id="overconst2"><span class="secno">2. </span><span class="content">Stop overconstraining allocators that should not participate in deduction</span><a class="self-link" href="#overconst2"></a></h2>
+   <h2 class="heading settled" data-level="2" id="overconst2"><span class="secno">2. </span><span class="content">Stop overconstraining allocators that <em>should not</em> participate in deduction</span><a class="self-link" href="#overconst2"></a></h2>
    <h2 class="heading settled" data-level="2.1" id="problem2"><span class="secno">2.1.</span><span class="content">The problem</span><a class="self-link" href="#problem2"></a></h2>
 Consider the following code:
 	 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
@@ -1588,7 +1593,7 @@ We’ve deduced conflicting types for <code class="highlight"><c- n>Allocator</c
     <h3 class="heading settled" data-level="2.3" id="solution2"><span class="secno">2.3 </span><span class="content">The solution</span><a class="self-link" href="#solution2"></a></h3>
       We present two approaches for changing the wording that are
       equivalent in effect
-       <h4 class="heading settled" data-level="2.3.1" id="option1"><span class="secno">3.2. </span><span class="content">Wording option 1</span><a class="self-link" href="#option1"></a></h4>
+       <h4 class="heading settled" data-level="2.3.1" id="option1"><span class="secno">2.3.1. </span><span class="content">Wording option 1</span><a class="self-link" href="#option1"></a></h4>
    <p>If we were introducing containers from scratch today, the natural approach would simply be for the constructors to indicate which arguments should be considered deducible as usual for function templates:
 For example, modify <a href="http://eel.is/c++draft/deque.overview">[deque.overview</a>] as follows:</p>
    <p><small></small></p>
@@ -1721,16 +1726,15 @@ if any of the following are true:<p></p> <ul><li data-md><p>It has an <code clas
 </pre></small> </blockquote>
 
     <h3 class="heading settled" data-level="2.4" id="implementation"><span class="secno">2.4 </span><span class="content">Implementation note</span><a class="self-link" href="#implementation"></a></h3>
-While vendors may of course implement this proposal exactly as
-described in the wording options above, we want to point out
+<p>While implementers may of course implement this proposal exactly as
+described in the wording options above, we wish to point out
 that a number of library implementations already behave in many cases as
-       proposed here.
-<p>The following table summarizes what we see in <a href="https://godbolt.org/z/1QepHG">this Godbolt</a>:</p>
+       we are proposing here as shown in the following table and
+ <a href="https://godbolt.org/z/1QepHG">this Godbolt</a>:</p>
    <p><small></small></p>
    <small> <table class="def"> <tbody><tr><th>Construct</th><th>Well-formed</th><th>SFINAE-friendly<br> ill-formed</th><th>Hard error</th></tr> <tr><td>std::deque(pd, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::forward_list(pfl, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::list(pl, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::map(pm, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::multimap(pmm, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::multiset(pms, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::set(ps, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::unordered_map(pum, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_multimap(pumm, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_multiset(pums, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_set(pus, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::vector(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr></tr> <tr><td>std::priority_queue(ppq, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr><td>std::queue(pq, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr><td>std::stack(ps, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr></tr> <tr><td>std::priority_queue(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::queue(pd, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::stack(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr></tbody></table> </small> 
-   <h2 class="heading settled" data-level="2" id="explanation"><span class="secno">2. </span><span class="content">The explanation</span><a class="self-link" href="#explanation"></a></h2>
-
-We should end up looking at the implicit guide generated from the constructor</p>
+<p>The following analysis explains why MSVC is, in effect, already
+    implementing the approach described in <a href="option1">wording option 1</a> above. Consider the implicit guide generated from the constructor</p>
 <pre class="language-c++ highlight">    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>Key</c-><c- p>,</c-> <c- n>class</c-> <c- n>Hash</c-><c- p>,</c-> <c- n>class</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>class</c-> <c- n>Allocator</c-><c- o>></c->
     <c- n>class</c-> <c- n>unordered_set</c-> <c- p>{</c->
         <c- n>unordered_set</c-><c- p>(</c-><c- k>const</c-> <c- n>unordered_set</c-><c- o>&lt;</c-><c- n>Key</c-><c- p>,</c-> <c- n>Hash</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Allocator</c-><c- o>>&amp;</c-><c- p>,</c-> <c- k>const</c-> <c- n>Allocator</c-><c- o>&amp;</c-><c- p>);</c->
@@ -1753,7 +1757,10 @@ that the constructor seen by the compiler in practice is equivalent to</p>
 and <code class="highlight"><c- n>Allocator</c-><c- o>=</c-><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>polymorphic_allocator</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-></code>.
 From the second parameter, we don’t deduce anything.
 In practice, therefore, deduction succeeds.</p>
-
+<p>In particular, implementers that have taken the above approach
+      can use that to simplify their implementation of this
+      proposal as an alternative to directly implementing
+      the above wording (which is of course also fine).</p>
   </main>
 <script>
 (function() {
