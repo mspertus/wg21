@@ -1469,8 +1469,9 @@ pre .property::before, pre .property::after {
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
    <p>Discussion of flatmap’s deduction guides revealed that the deduction guides for
 
-  sequence containers and container adaptors are subtly overconstrained in ways that unnecessarily restrict desirable
-	   code. We fix this.</p>
+  sequence containers and container adaptors are needlessly overconstrained,
+       making use cases such as PMR containers unnecessarily difficult.
+       We fix this.</p>
   </div>
   <nav data-fill-with="table-of-contents" id="toc">
    <h2 class="no-num no-toc no-ref" id="contents">Table of Contents</h2>
@@ -1498,7 +1499,8 @@ pre .property::before, pre .property::after {
    </ol>
   </nav>
   <main>
-   <h2 class="heading settled" data-level="1" id="problem"><span class="secno">1. </span><span class="content">The problem: Overconstraining allocators that do not participate in deduction</span><a class="self-link" href="#problem"></a></h2>
+   <h2 class="heading settled" data-level="1" id="overconst1"><span class="secno">1. </span><span class="content">Stop overconstraining allocators that do not participate in deduction</span><a class="self-link" href="#overconst1"></a></h2>
+  <h3 class="heading settled" data-level="1" id="overconstr"><span class="secno">1.1 </span><span class="content">The problem</span><a class="self-link" href="#problem"></a></h3>
    <p>Consider this code:</p>
 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
 <c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>polymorphic_allocator</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-> <c- n>a</c-> <c- o>=</c-> <c- o>&amp;</c-><c- n>mr</c-><c- p>;</c->
@@ -1517,33 +1519,22 @@ pre .property::before, pre .property::after {
 		  determining the template arguments for <code class="highlight"><c- n>stack</c-></code>! It seems clearly wrong that we give all the right information to unambiguously deduce the desired specialization of <code class="highlight"><c- n>stack</c-></code> and then reject what would be a perfectly valid constructor invocation
 	  for that class. Since the allocator parameter’s type does not <em>contribute</em> to class template argument deduction in these cases; it brings no new information, and therefore
 should be treated no differently than it is in the non-CTAD case. Indeed, we believe this is an oversight and should simply be fixed.</p>
-	    <h3 class="heading settled" data-level="2.3" id="explanation-stack"><span class="secno">2.3. </span><span class="content">How deduction fails for <code class="highlight"><c- n>stack</c-></code></span><a class="self-link" href="#explanation-stack"></a></h3>
+	    <h3 class="heading settled" data-level="1.2" id="explanation1"><span class="secno">1.2. </span><span class="content">The explanation</span><a class="self-link" href="#explanation1"></a></h3>
    <p><code class="highlight"><c- n>stack</c-></code> has one relevant deduction guide.</p>
-<pre class="language-c++ highlight">    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>T</c-><c- p>,</c-> <c- n>class</c-> <c- n>Container</c-><c- o>></c->
-    <c- n>class</c-> <c- n>stack</c-> <c- p>{</c->
-        <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>Alloc</c-><c- o>></c-> <c- n>stack</c-><c- p>(</c-><c- k>const</c-> <c- n>Container</c-><c- o>&amp;</c-><c- p>,</c-> <c- k>const</c-> <c- n>Alloc</c-><c- o>&amp;</c-><c- p>);</c->
-    <c- p>};</c->
-
-    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>Container</c-><c- p>,</c-> <c- n>class</c-> <c- n>Allocator</c-><c- o>></c->
+<pre class="language-c++ highlight">    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>Container</c-><c- p>,</c-> <c- n>class</c-> <c- n>Allocator</c-><c- o>></c->
     <c- n>stack</c-><c- p>(</c-><c- n>Container</c-><c- p>,</c-> <c- n>Allocator</c-><c- p>)</c-> <c- o>-></c-> <c- n>stack</c-><c- o>&lt;</c-><c- kr>typename</c-> <c- n>Container</c-><c- o>::</c-><c- n>value_type</c-><c- p>,</c-> <c- n>Container</c-><c- o>></c-><c- p>;</c->
 </pre>
-   <p>However, both the constructor and the deduction guide are constrained.</p>
-   <p><a href="http://eel.is/c++draft/stack.cons.alloc">[stack.cons.alloc</a>] says: <small></small></p>
-   <blockquote><small> If <code class="highlight"><c- n>uses_allocator_v</c-><c- o>&lt;</c-><c- n>container_type</c-><c- p>,</c-> <c- n>Alloc</c-><c- o>></c-></code> is <code class="highlight">false</code> the constructors in this subclause shall not participate in overload resolution.<p></p> </small></blockquote>
-   <p><a href="http://eel.is/c++draft/container.adaptors.general">[container.adaptors.general</a>] says: <small></small></p>
+   <p>This deduction guide satisfies the following constraints.</p>
+    <p><a href="http://eel.is/c++draft/container.adaptors.general">[container.adaptors.general</a>] says: <small></small></p>
    <blockquote><small> A deduction guide for a container adaptor shall not participate in overload resolution if
 any of the following are true: ...<p></p> <ul><li data-md><p><b>It has an <code class="highlight"><c- n>Allocator</c-></code> template parameter and a type that does not qualify as an allocator
   is deduced for that parameter.</b></p> </li><li data-md><p>It has both <code class="highlight"><c- n>Container</c-></code> and <code class="highlight"><c- n>Allocator</c-></code> template parameters, and <code class="highlight"><c- n>uses_allocator_v</c-><c- o>&lt;</c-><c- n>Container</c-><c- p>,</c-> <c- n>Allocator</c-><c- o>></c-></code> is <code class="highlight">false</code>.</p> </li></ul> </small></blockquote>
    <p>To qualify as an allocator, a type <code class="highlight"><c- n>A</c-></code> must have a nested typedef <code class="highlight"><c- n>A</c-><c- o>::</c-><c- n>value_type</c-></code> <small>(<a href="http://eel.is/c++draft/container.requirements.general#17">[container.requirements.general</a>]/17)</small>.
 Since <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-><c- o>*</c-></code> has no such nested typedef, <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-><c- o>*</c-></code> doesn’t qualify as an allocator.
 However, <code class="highlight"><c- n>uses_allocator_v</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-><c- p>,</c-> <c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-><c- o>*></c-></code> is <code class="highlight">true</code>.</p>
-   <p>Because the type of <code class="highlight"><c- o>&amp;</c-><c- n>mr</c-></code> doesn’t qualify as an allocator, the deduction guide drops out
-of overload resolution. The implicit guide generated from the constructor template, however,
-remains. From the first parameter we deduce <code class="highlight"><c- n>Container</c-><c- o>=</c-><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-></code>. From the
-second parameter, we deduce <code class="highlight"><c- n>Alloc</c-><c- o>=</c-><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-><c- o>*</c-></code>. So far so good.
-But CTAD’s job is not done! We have successfully deduced the <code class="highlight"><c- n>Container</c-></code> type in <code class="highlight"><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>T</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Container</c-><c- o>></c-> <c- k>class</c-> <c- nc>stack</c-></code>; but we have not deduced anything about
-the type parameter <code class="highlight"><c- n>T</c-></code>. Therefore deduction fails.</p>
- <h3 class="heading settled" data-level="3.1" id="solution-stack"><span class="secno">3.1. </span><span class="content">How to fix the container adaptors</span><a class="self-link" href="#solution-stack"></a></h3>
+   <p>Because the type of <code class="highlight"><c- o>&amp;</c-><c- n>mr</c-></code> doesn’t qualify as an allocator, the deduction guide drops out of resolution, failing deduction even though it has all the information needed
+       to safely deduce the correct template arguments for <code class="highlight"><c- n>stack</c-></code>.
+ <h3 class="heading settled" data-level="1.3" id="solution1"><span class="secno">1.3. </span><span class="content">The solution</span><a class="self-link" href="#solution1"></a></h3>
    <p>To fix all three container adaptors, modify <a href="http://eel.is/c++draft/container.adaptors.general">[container.adaptors.general</a>] as follows:</p>
    <p><small></small></p>
    <blockquote><small> A deduction guide for a container adaptor shall not participate in overload resolution if any of the following are true:<p></p> <ul><li data-md><p>It has an <code class="highlight"><c- n>InputIterator</c-></code> template parameter and a type that does not qualify as an
@@ -1556,7 +1547,8 @@ we shouldn’t interrogate it any more closely. Trust the <code class="highlight
    <p class="note" role="note"><span>Note:</span> No container adaptor deduction guide has an <code class="highlight"><c- n>Allocator</c-></code> template parameter without also having
 a <code class="highlight"><c- n>Container</c-></code> template parameter.</p>
 
-   <h2 class="heading settled" data-level="1" id="problem"><span class="secno">2. </span><span class="content">The problem: Overconstraining allocators that should not participate in deduction</span><a class="self-link" href="#problem"></a></h2>
+   <h2 class="heading settled" data-level="2" id="overconst2"><span class="secno">2. </span><span class="content">Stop overconstraining allocators that should not participate in deduction</span><a class="self-link" href="#overconst2"></a></h2>
+   <h2 class="heading settled" data-level="2.1" id="problem2"><span class="secno">2.1.</span><span class="content">The problem</span><a class="self-link" href="#problem2"></a></h2>
 Consider the following code:
 	 <pre class="language-c++ highlight"><c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-> <c- n>mr</c-><c- p>;</c->
 <c- n>std</c-><c- o>::</c-><c- n>pmr</c-><c- o>::</c-><c- n>polymorphic_allocator</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-> <c- n>a</c-> <c- o>=</c-> <c- o>&amp;</c-><c- n>mr</c-><c- p>;</c->
@@ -1581,7 +1573,7 @@ should be treated no differently than it is in the non-CTAD case.</p>
 version <code class="highlight"><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- p>(</c-><c- n>pv</c-><c- p>,</c-> <c- o>&amp;</c-><c- n>mr</c-><c- p>)</c-></code> fails.</p>
    <p>The problem we see with <code class="highlight"><c- n>vector</c-></code> also occurs for all other sequence containers, associative containers,
 and unordered associative containers. 
-  <h3 class="heading settled" data-level="2.1" id="explanation-vector"><span class="secno">2.1. </span><span class="content">How deduction fails for <code class="highlight"><c- n>vector</c-></code></span><a class="self-link" href="#explanation-vector"></a></h3>
+  <h3 class="heading settled" data-level="2.2" id="explanation2"><span class="secno">2.2. </span><span class="content">The explanation</span><a class="self-link" href="#explanation2"></a></h3>
    <p><code class="highlight"><c- n>vector</c-></code> has only one deduction guide, and it’s not relevant to what happens here. Here, we end up
 looking at the implicit guide generated from the constructor</p>
 <pre class="language-c++ highlight">    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>T</c-><c- p>,</c-> <c- n>class</c-> <c- n>Allocator</c-><c- o>></c->
@@ -1593,13 +1585,11 @@ looking at the implicit guide generated from the constructor</p>
 From the second argument, we deduce <code class="highlight"><c- n>Allocator</c-><c- o>=</c-><c- n>std</c-><c- o>::</c-><c- n>monotonic_buffer_resource</c-><c- o>*</c-></code>.
 We’ve deduced conflicting types for <code class="highlight"><c- n>Allocator</c-></code>, so deduction fails.</p>
 	  <p>In this case, the second argument unnecessarily participates in deduction, and again unexpectedly preventing natural and useful code from working as desired.</p>
-    <h2 class="heading settled" data-level="3" id="solution"><span class="secno">3. </span><span class="content">The solution</span><a class="self-link" href="#solution"></a></h2>
-   <p class="note" role="note"><span>Note:</span> Most of the wording being touched here was added by <a data-link-type="biblio" href="#biblio-p0433r3">[P0433R3]</a>, on which Mike Spertus
-was the primary author. If we’d thought of these cases at the time, this is how we would have
-done these deduction guides from the beginning.</p>
-     <h3 class="heading settled" data-level="3.2" id="solution-vector-option1"><span class="secno">3.2. </span><span class="content">How to fix the containers (option 1)</span><a class="self-link" href="#solution-vector-option1"></a></h3>
-   <p>If we were introducing containers from scratch today, the natural approach would simply be for the constructors to state which arguments should be considered deducible,
-	   just like any other function templates:
+    <h3 class="heading settled" data-level="2.3" id="solution2"><span class="secno">2.3 </span><span class="content">The solution</span><a class="self-link" href="#solution2"></a></h3>
+      We present two approaches for changing the wording that are
+      equivalent in effect
+       <h4 class="heading settled" data-level="2.3.1" id="option1"><span class="secno">3.2. </span><span class="content">Wording option 1</span><a class="self-link" href="#option1"></a></h4>
+   <p>If we were introducing containers from scratch today, the natural approach would simply be for the constructors to indicate which arguments should be considered deducible as usual for function templates:
 For example, modify <a href="http://eel.is/c++draft/deque.overview">[deque.overview</a>] as follows:</p>
    <p><small></small></p>
    <blockquote>
@@ -1612,9 +1602,12 @@ For example, modify <a href="http://eel.is/c++draft/deque.overview">[deque.overv
 <c- n>deque</c-><c- p>(</c-><c- n>initializer_list</c-><t><c- p>,</c-> <c- k>const</c-> <c- n>Allocator</c-><c- o>&amp;</c-> <c- o>=</c-> <c- n>Allocator</c-><c- p>());</c->
 </t></pre></small>
    </blockquote>
-	  Indeed, even today this would be our preferred solution if it is not deemed to cause compatibility issues.
-   <h3 class="heading settled" data-level="3.3" id="solution-vector-option2"><span class="secno">3.3. </span><span class="content">How to fix the containers (option 2)</span><a class="self-link" href="#solution-vector-option2"></a></h3>
-	  <p>If the first solution is considered too invasive at this point in time, we can non-invasively direct the desired deductions by adding a deduction
+	  If it is not deemed to cause compatibility issues (since taking
+      the address of constructor is not allowed, we hope the impact will
+      be minimal), we still
+      like this approach.
+   <h4 class="heading settled" data-level="2.3.2" id="option2"><span class="secno">2.3.2 </span><span class="content">Wording option 2</span><a class="self-link" href="#option2"></a></h4>
+	  <p>If the above approach is considered too invasive at this point in time, we can non-invasively direct the desired deductions by adding a deduction
 	  guide to each container.</p>
    <p>First modify <a href="http://eel.is/c++draft/sequence.reqmts#13"> [sequence.reqmts</a>]/13 as follows:</p>
    <p><small></small></p>
@@ -1725,17 +1718,18 @@ if any of the following are true:<p></p> <ul><li data-md><p>It has an <code clas
 <ins><c- k>template</c-><c- o>&lt;</c-><c- k>class</c-> <c- nc>T</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Hash</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Pred</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Allocator</c-><c- p>,</c-> <c- k>class</c-> <c- nc>Alloc</c-><c- o>></c->
   <c- n>unordered_set</c-><c- p>(</c-><c- n>set</c-><c- o>&lt;</c-><c- n>T</c-><c- p>,</c-> <c- n>Hash</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Allocator</c-><c- o>></c-><c- p>,</c-> <c- n>Alloc</c-><c- p>)</c->
     <c- o>-></c-> <c- n>unordered_set</c-><c- o>&lt;</c-><c- n>T</c-><c- p>,</c-> <c- n>Hash</c-><c- p>,</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>Allocator</c-><c- o>></c-><c- p>;</c-></ins>
-</pre></small>
-	   	   However, there is implementation divergence in the details.
-The following table summarizes what we see in <a href="https://godbolt.org/z/1QepHG">this Godbolt</a>:</p>
+</pre></small> </blockquote>
+
+    <h3 class="heading settled" data-level="2.4" id="implementation"><span class="secno">2.4 </span><span class="content">Implementation note</span><a class="self-link" href="#implementation"></a></h3>
+While vendors may of course implement this proposal exactly as
+described in the wording options above, we want to point out
+that a number of library implementations already behave in many cases as
+       proposed here.
+<p>The following table summarizes what we see in <a href="https://godbolt.org/z/1QepHG">this Godbolt</a>:</p>
    <p><small></small></p>
    <small> <table class="def"> <tbody><tr><th>Construct</th><th>Well-formed</th><th>SFINAE-friendly<br> ill-formed</th><th>Hard error</th></tr> <tr><td>std::deque(pd, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::forward_list(pfl, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::list(pl, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::map(pm, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::multimap(pmm, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::multiset(pms, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::set(ps, &amp;mr)</td> <td>MSVC</td> <td>libstdc++, libc++</td> <td></td> </tr><tr><td>std::unordered_map(pum, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_multimap(pumm, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_multiset(pums, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::unordered_set(pus, &amp;mr)</td> <td>MSVC, libstdc++</td> <td>libc++</td> <td></td> </tr><tr><td>std::vector(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr></tr> <tr><td>std::priority_queue(ppq, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr><td>std::queue(pq, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr><td>std::stack(ps, &amp;mr)</td> <td>MSVC, libstdc++, libc++</td> <td></td> <td></td> </tr><tr></tr> <tr><td>std::priority_queue(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::queue(pd, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr><tr><td>std::stack(pv, &amp;mr)</td> <td></td> <td>MSVC, libstdc++, libc++</td> <td></td> </tr></tbody></table> </small> 
    <h2 class="heading settled" data-level="2" id="explanation"><span class="secno">2. </span><span class="content">The explanation</span><a class="self-link" href="#explanation"></a></h2>
 
-   </blockquote>
-	
-    <h3 class="heading settled" data-level="2.2" id="explanation-unordered-set"><span class="secno">2.2. </span><span class="content">How deduction succeeds for <code class="highlight"><c- n>unordered_set</c-></code></span><a class="self-link" href="#explanation-unordered-set"></a></h3>
-   <p>It should work the same as for <code class="highlight"><c- n>vector</c-></code>.
 We should end up looking at the implicit guide generated from the constructor</p>
 <pre class="language-c++ highlight">    <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>Key</c-><c- p>,</c-> <c- n>class</c-> <c- n>Hash</c-><c- p>,</c-> <c- n>class</c-> <c- n>Pred</c-><c- p>,</c-> <c- n>class</c-> <c- n>Allocator</c-><c- o>></c->
     <c- n>class</c-> <c- n>unordered_set</c-> <c- p>{</c->
