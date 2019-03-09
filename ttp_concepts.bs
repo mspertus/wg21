@@ -1,0 +1,44 @@
+<pre class='metadata'>
+Title: Using unconstrained template template parameters and constrained templates
+Shortname: Pxxxx
+Revision: 0
+!Draft Revision: 1
+Audience: LEWG
+Status: D
+Group: WG21
+URL:
+Editor: Mike Spertus, mike_spertus@symantec.com
+Markup Shorthands: markdown yes, biblio yes, markup yes
+Abstract:
+    Unconstrained template template parameters cannot accept constrained templates.
+    This blocks important use cases and causes legacy templates to behave in
+    unexpected ways as pointed out in Concepts TS issue 14. We propose 
+    addressing this.
+Date: 2019-03-11
+</pre>
+
+<style>
+ins  {background-color: #CCFFCC; text-decoration: underline;}
+del  {background-color: #FFCACA; text-decoration: line-through;}
+</style>
+
+
+# The problem # {#problem}
+It is our understanding that any template accepting an unconstrained template template parameter
+cannot accept a constrained template. This creates problems with both legacy code
+and new code as any constraints that are irrelevant to the purpose of the template
+template parameter prevent the parameter from matching.
+
+Consider the following examples
+
+```c++
+
+// Concepts TS issue 14 due to Roland Bock
+// A template that takes a tuple and copies its arguments into another template (sink)
+
+template<typename Tuple, template<typename...> class Sink>
+using copy_tuple_args = ...
+
+
+
+```
