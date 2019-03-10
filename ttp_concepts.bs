@@ -1,10 +1,9 @@
 <pre class='metadata'>
 Title: Using unconstrained template template parameters with constrained templates
-Shortname: Pxxxx
+Shortname: P1616
 Revision: 0
-!Draft Revision: 1
 Audience: EWG
-Status: D
+Status: P
 Group: WG21
 URL:
 Editor: Mike Spertus, mike_spertus@symantec.com
