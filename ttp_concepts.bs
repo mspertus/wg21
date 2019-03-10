@@ -3,11 +3,12 @@ Title: Using unconstrained template template parameters and constrained template
 Shortname: Pxxxx
 Revision: 0
 !Draft Revision: 1
-Audience: LEWG
+Audience: EWG
 Status: D
 Group: WG21
 URL:
 Editor: Mike Spertus, mike_spertus@symantec.com
+Editor: Roland Bock, rbock@eudoxos.de
 Markup Shorthands: markdown yes, biblio yes, markup yes
 Abstract:
     Unconstrained template template parameters cannot accept constrained templates.
@@ -25,20 +26,93 @@ del  {background-color: #FFCACA; text-decoration: line-through;}
 
 # The problem # {#problem}
 It is our understanding that any template accepting an unconstrained template template parameter
-cannot accept a constrained template. This creates problems with both legacy code
-and new code as any constraints that are irrelevant to the purpose of the template
-template parameter prevent the parameter from matching.
+cannot accept a constrained template as pointed out in [Concepts TS Issue 14](http://cplusplus.github.io/concepts-ts/ts-active.html#14). 
+This creates problems with both legacy and new code.
 
-Consider the following examples
-
+To illustrate the problem, define the following classes
 ```c++
+template<class T, class U> 
+struct Unconstrained { Unconstrained(U, V);};
 
-// Concepts TS issue 14 due to Roland Bock
+template<class T, class U, class = enable_if_t<is_integral_v<U>>> 
+struct Sfinae { Sfinae(U, V); };
+
+template<class T, class U> requires Integral<U> 
+struct Conceptized { Conceptized(U, V); };
+```
+
+In Concepts TS issue 14, the following was a blocker to adding concepts to sqlpp11.
+```c++
 // A template that takes a tuple and copies its arguments into another template (sink)
-
 template<typename Tuple, template<typename...> class Sink>
 using copy_tuple_args = ...
 
-
-
+copy_tuple_args<tuple<char *, int>, Unconstrained> u1; // OK. Unconstrained<char *, int>
+copy_tuple_args<tuple<char *, int>, Sfinae> s1;        // OK. Sfinae<char *, int>
+copy_tuple_args<tuple<char *, int>, Conceptized> c1;   // Ill-formed instead of desired Conceptized<char *, int> :(
 ```
+
+As any C++17 use of template template parameters is incompatible with concept-constrained
+templates, any attempt to concept constrain classes in existing code basis will be likely
+to cause difficult or even impossible to fix breakage, discouraging the adoption of Concepts:
+```C++
+template<template<class, class> class TT, class A>
+struct curry {    
+    template<class B>
+    using type = TT<A, B>; 
+}; 
+
+curry<Unconstrained, char *>::type<int> u3;  // OK. Unconstrained<char *, int>
+curry<Sfinae, char *>::type<int>  s3         // OK. Sfinae<char *, int>
+curry<Conceptized, char *>::type<int> c3;    // Ill-formed instead of desired Conceptized<char *, int>
+```
+There is not even a way to write new code with template template parameters that works with
+concept-constrained classes, even though there are good use cases like [Inferencing heap objects (P1069)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1069r1.html)
+```c++
+// Notation of P1069
+auto u4 = make_unique<Unconstrained>(3, 5); // OK. unique_ptr<Unconstrained<int, int>>
+auto s4 = make_unique<Sfinae>(3, 5);        // OK. unique_ptr<Unconstrained<int, int>>
+auto c4 = make_unique<Conceptized>(3, 5);   // Ill-formed instead of desired Conceptized<int, int>
+```
+
+Likewise, [ranges::to (P1206)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf) awkwardly relies on standard library containers only because they are unconstrained.
+```c++
+// copy a list to a vector of the same type, deducing value_type
+Same<std::vector<int>> auto c = ranges::to<std::vector>(l); // OK, vector is not concept-constrained
+```
+
+# The solution # {#solution}
+We propose the same solution as in Concepts TS issue 14, which is that an unconstrained template
+template parameter match concept-constrained classes. E.g.,
+```c++
+copy_tuple_args<tuple<char *, int>, Conceptized> c1;   // Proposed: Conceptized<char *, int> :(
+curry<Conceptized, char *>::type<int> c3;              // Proposed: Conceptized<char *, int>
+auto c4 = make_unique<Conceptized>(3, 5);              // Proposed: Conceptized<int, int>
+```
+Note that violations of the constraints will still produce concept-aware error messages
+```c++
+// Proposed: Ill-formed with concept violation as desired
+copy_tuple_args<tuple<int, char *>, Conceptized> c5; 
+```
+# Why not create a new notation? # {#faq1}
+While one could imagine some new notation for template template parameters
+that works with and without constraints, we believe that would still be an unsatisfactory solution
+for the following reasons
+
+* All pre-C++20 template template parameters that were written in the past with the expectation that they would match any templates will fail to work with concept-constrained templates, discouraging existing code bases from conceptizing classes
+* Teachers will have to teach the subtle point that any constrained class that might ever need to match a template template parameter should be SFINAE constrained rather than concept-constrained. We would much rather stop teaching SFINAE altogether instead of a new subtlety...
+* A new notation could not be added before C++23. Our proposal could easily apply to C++20 as a wording fix to Concepts
+
+# What if we want to only match unconstrained templates? # {#faq2}
+We are unaware of use cases for this in contrast to the significant use cases for this proposal. However, 
+note that natural notations could easily be developed and added. For example,
+
+```c++
+template<template<class, class> requires {}> // Not proposed at this time
+class OnlyMatchesUnconstrained {};
+
+OnlyMatchesUnconstrained<Unconstrained> u5; // OK
+OnlyMatchesUnconstrained<Sfinae> s5; // OK
+OnlyMatchesUnconstrained<Conceptized> s5; // Ill-formed as desired
+```
+
