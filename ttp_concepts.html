@@ -1528,7 +1528,7 @@ concept-constrained classes, even though there are good use cases like <a href="
    <h2 class="heading settled" data-level="2" id="solution"><span class="secno">2. </span><span class="content">The solution</span><a class="self-link" href="#solution"></a></h2>
     We propose simply that an unconstrained template
 template parameter match concept-constrained classes. E.g., 
-<pre class="language-c++ highlight"><c- n>copy_tuple_args</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>char</c-> <c- o>*</c-><c- p>,</c-> <c- b>int</c-><c- o>></c-><c- p>,</c-> <c- n>Conceptized</c-><c- o>></c-> <c- n>c1</c-><c- p>;</c->   <c- c1>// Proposed: Conceptized&lt;char *, int> :(</c->
+<pre class="language-c++ highlight"><c- n>copy_tuple_args</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>char</c-> <c- o>*</c-><c- p>,</c-> <c- b>int</c-><c- o>></c-><c- p>,</c-> <c- n>Conceptized</c-><c- o>></c-> <c- n>c1</c-><c- p>;</c->   <c- c1>// Proposed: Conceptized&lt;char *, int></c->
 <c- n>curry</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- p>,</c-> <c- b>char</c-> <c- o>*>::</c-><c- n>type</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-> <c- n>c3</c-><c- p>;</c->              <c- c1>// Proposed: Conceptized&lt;char *, int></c->
 <c- k>auto</c-> <c- n>c4</c-> <c- o>=</c-> <c- n>make_unique</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- o>></c-><c- p>(</c-><c- mi>3</c-><c- p>,</c-> <c- mi>5</c-><c- p>);</c->              <c- c1>// Proposed: Conceptized&lt;int, int></c->
 </pre>
