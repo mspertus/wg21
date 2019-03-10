@@ -82,7 +82,7 @@ Same<std::vector<int>> auto c = ranges::to<std::vector>(l); // OK, vector is not
 ```
 
 # The solution # {#solution}
-We propose the same solution as in Concepts TS issue 14, which is that an unconstrained template
+We propose simply that an unconstrained template
 template parameter match concept-constrained classes. E.g.,
 ```c++
 copy_tuple_args<tuple<char *, int>, Conceptized> c1;   // Proposed: Conceptized<char *, int> :(
