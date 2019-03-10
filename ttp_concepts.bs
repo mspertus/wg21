@@ -1,5 +1,5 @@
 <pre class='metadata'>
-Title: Using unconstrained template template parameters and constrained templates
+Title: Using unconstrained template template parameters with constrained templates
 Shortname: Pxxxx
 Revision: 0
 !Draft Revision: 1
