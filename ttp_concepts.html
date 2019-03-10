@@ -1474,6 +1474,7 @@ pre .property::before, pre .property::after {
     <li><a href="#solution"><span class="secno">2</span> <span class="content">The solution</span></a>
     <li><a href="#faq1"><span class="secno">3</span> <span class="content">Why not create a new notation?</span></a>
     <li><a href="#faq2"><span class="secno">4</span> <span class="content">What if we want to only match unconstrained templates?</span></a>
+    <li><a href="#faq3"><span class="secno">5</span> <span class="content">What about more general template parameters?</span></a>
    </ol>
   </nav>
   <main>
@@ -1557,6 +1558,12 @@ note that natural notations could easily be developed and added. For example,
 <c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c-> <c- c1>// OK</c->
 <c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c-> <c- c1>// Ill-formed as desired</c->
 </pre>
+   <h2 class="heading settled" data-level="5" id="faq3"><span class="secno">5. </span><span class="content">What about more general template parameters?</span><a class="self-link" href="#faq3"></a></h2>
+    This proposal only covers the requirements around unconstrained template
+template parameters. We are aware that various more general rules have been discussed
+for when a template argument should match a parameter, including some that would subsume
+this proposal.  This paper offers no opinion on such proposals as long as
+they allow the code examples above to behave as proposed. 
   </main>
 <script>
 (function() {

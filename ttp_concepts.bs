@@ -114,4 +114,11 @@ OnlyMatchesUnconstrained<Unconstrained> u5; // OK
 OnlyMatchesUnconstrained<Sfinae> s5; // OK
 OnlyMatchesUnconstrained<Conceptized> s5; // Ill-formed as desired
 ```
+# What about more general template parameters? # {#faq3}
+This proposal only covers the requirements around unconstrained template
+template parameters. We are aware that various more general rules have been discussed
+for when a template argument should match a parameter, including some that would subsume
+this proposal.  This paper offers no opinion on such proposals as long as
+they allow the code examples above to behave as proposed.
+
 
