@@ -67,7 +67,7 @@ curry<Unconstrained, char *>::type<int> u3;  // OK. Unconstrained<char *, int>
 curry<Sfinae, char *>::type<int>  s3         // OK. Sfinae<char *, int>
 curry<Conceptized, char *>::type<int> c3;    // Ill-formed instead of desired Conceptized<char *, int>
 ```
-There is not even a way to write new code with template template parameters without introducing restrictions on constraints, even though there are good use cases like [Inferencing heap objects (P1069)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1069r1.html)
+There is not even a way to write new code with template template parameters without introducing restrictions on constraints, even though there are good use cases like [Inferencing heap objects (P1069)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1069r1.html):
 ```c++
 // Notation of P1069
 auto u4 = make_unique<Unconstrained>(3, 5); // OK. unique_ptr<Unconstrained<int, int>>
@@ -75,7 +75,7 @@ auto s4 = make_unique<Sfinae>(3, 5);        // OK. unique_ptr<Unconstrained<int,
 auto c4 = make_unique<Conceptized>(3, 5);   // Ill-formed instead of desired Conceptized<int, int>
 ```
 
-Likewise, [ranges::to (P1206)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf) awkwardly relies on standard library containers only because they are unconstrained.
+Likewise, [ranges::to (P1206)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf) awkwardly relies on standard library containers only because they are unconstrained:
 ```c++
 // copy a list to a vector of the same type, deducing value_type
 Same<std::vector<int>> auto c = ranges::to<std::vector>(l); // OK, vector is not concept-constrained
