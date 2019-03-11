@@ -1502,9 +1502,11 @@ This creates problems with both legacy and new code.
 <c- n>copy_tuple_args</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>char</c-> <c- o>*</c-><c- p>,</c-> <c- b>int</c-><c- o>></c-><c- p>,</c-> <c- n>Conceptized</c-><c- o>></c-> <c- n>c1</c-><c- p>;</c->   <c- c1>// Ill-formed instead of desired Conceptized&lt;char *, int> :(</c->
 </pre>
    <p>As any C++17 use of template template parameters is incompatible with concept-constrained
-templates, any attempt to concept constrain classes in existing code basis will be likely
+templates, any attempt to concept constrain classes in existing code bases that make use of
+template template parameters will be likely
 to cause difficult or even impossible to fix breakage, discouraging the adoption of Concepts:</p>
-<pre class="language-C++ highlight"><c- n>template</c-><c- o>&lt;</c-><c- n>template</c-><c- o>&lt;</c-><c- n>class</c-><c- p>,</c-> <c- n>class</c-><c- o>></c-> <c- n>class</c-> <c- n>TT</c-><c- p>,</c-> <c- n>class</c-> <c- n>A</c-><c- o>></c->
+<pre class="language-C++ highlight"><c- c1>// Valid C++17 template</c->
+<c- n>template</c-><c- o>&lt;</c-><c- n>template</c-><c- o>&lt;</c-><c- n>class</c-><c- p>,</c-> <c- n>class</c-><c- o>></c-> <c- n>class</c-> <c- n>TT</c-><c- p>,</c-> <c- n>class</c-> <c- n>A</c-><c- o>></c->
 <c- k>struct</c-> <c- n>curry</c-> <c- p>{</c->    
     <c- n>template</c-><c- o>&lt;</c-><c- n>class</c-> <c- n>B</c-><c- o>></c->
     <c- n>using</c-> <c- n>type</c-> <c- o>=</c-> <c- n>TT</c-><c- o>&lt;</c-><c- n>A</c-><c- p>,</c-> <c- n>B</c-><c- o>></c-><c- p>;</c-> 
