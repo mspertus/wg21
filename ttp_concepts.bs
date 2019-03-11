@@ -51,7 +51,7 @@ copy_tuple_args<tuple<char *, int>, Sfinae> s1;        // OK. Sfinae<char *, int
 copy_tuple_args<tuple<char *, int>, Conceptized> c1;   // Ill-formed instead of desired Conceptized<char *, int> :(
 ```
 
-As any C++17 use of template template parameters is incompatible with concept-constrained
+As C++17 template template parameters are incompatible with concept-constrained
 templates, any attempt to concept constrain classes in existing code bases that make use of
 template template parameters will be likely
 to cause difficult or even impossible to fix breakage, discouraging the adoption of Concepts:
