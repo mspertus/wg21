@@ -1516,8 +1516,7 @@ to cause difficult or even impossible to fix breakage, discouraging the adoption
 <c- n>curry</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- p>,</c-> <c- b>char</c-> <c- o>*>::</c-><c- n>type</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c->  <c- n>s3</c->         <c- c1>// OK. Sfinae&lt;char *, int></c->
 <c- n>curry</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- p>,</c-> <c- b>char</c-> <c- o>*>::</c-><c- n>type</c-><c- o>&lt;</c-><c- b>int</c-><c- o>></c-> <c- n>c3</c-><c- p>;</c->    <c- c1>// Ill-formed instead of desired Conceptized&lt;char *, int></c->
 </pre>
-   There is not even a way to write new code with template template parameters that works with
-concept-constrained classes, even though there are good use cases like <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1069r1.html">Inferencing heap objects (P1069)</a> 
+   There is not even a way to write new code with template template parameters without introducing restrictions on constraints, even though there are good use cases like <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1069r1.html">Inferencing heap objects (P1069)</a> 
 <pre class="language-c++ highlight"><c- c1>// Notation of P1069</c->
 <c- k>auto</c-> <c- n>u4</c-> <c- o>=</c-> <c- n>make_unique</c-><c- o>&lt;</c-><c- n>Unconstrained</c-><c- o>></c-><c- p>(</c-><c- mi>3</c-><c- p>,</c-> <c- mi>5</c-><c- p>);</c-> <c- c1>// OK. unique_ptr&lt;Unconstrained&lt;int, int>></c->
 <c- k>auto</c-> <c- n>s4</c-> <c- o>=</c-> <c- n>make_unique</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- o>></c-><c- p>(</c-><c- mi>3</c-><c- p>,</c-> <c- mi>5</c-><c- p>);</c->        <c- c1>// OK. unique_ptr&lt;Unconstrained&lt;int, int>></c->
