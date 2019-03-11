@@ -52,7 +52,7 @@ copy_tuple_args<tuple<char *, int>, Conceptized> c1;   // Ill-formed instead of 
 ```
 
 As C++17 template template parameters are incompatible with concept-constrained
-templates, any attempt to concept constrain classes in existing code bases that make use of
+templates, any attempt to concept constrain templates in existing code bases that make use of
 template template parameters will be likely
 to cause difficult or even impossible to fix breakage, discouraging the adoption of Concepts:
 ```C++
@@ -75,7 +75,7 @@ auto s4 = make_unique<Sfinae>(3, 5);        // OK. unique_ptr<Unconstrained<int,
 auto c4 = make_unique<Conceptized>(3, 5);   // Ill-formed instead of desired Conceptized<int, int>
 ```
 
-Likewise, [ranges::to (P1206)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf) awkwardly relies on standard library containers only because they are unconstrained:
+Likewise, [ranges::to (P1206)](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf) awkwardly relies on standard library containers being unconstrained:
 ```c++
 // copy a list to a vector of the same type, deducing value_type
 Same<std::vector<int>> auto c = ranges::to<std::vector>(l); // OK, vector is not concept-constrained

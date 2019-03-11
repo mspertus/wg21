@@ -1502,7 +1502,7 @@ This creates problems with both legacy and new code.
 <c- n>copy_tuple_args</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>char</c-> <c- o>*</c-><c- p>,</c-> <c- b>int</c-><c- o>></c-><c- p>,</c-> <c- n>Conceptized</c-><c- o>></c-> <c- n>c1</c-><c- p>;</c->   <c- c1>// Ill-formed instead of desired Conceptized&lt;char *, int> :(</c->
 </pre>
    <p>As C++17 template template parameters are incompatible with concept-constrained
-templates, any attempt to concept constrain classes in existing code bases that make use of
+templates, any attempt to concept constrain templates in existing code bases that make use of
 template template parameters will be likely
 to cause difficult or even impossible to fix breakage, discouraging the adoption of Concepts:</p>
 <pre class="language-C++ highlight"><c- c1>// Valid C++17 template</c->
@@ -1522,7 +1522,7 @@ to cause difficult or even impossible to fix breakage, discouraging the adoption
 <c- k>auto</c-> <c- n>s4</c-> <c- o>=</c-> <c- n>make_unique</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- o>></c-><c- p>(</c-><c- mi>3</c-><c- p>,</c-> <c- mi>5</c-><c- p>);</c->        <c- c1>// OK. unique_ptr&lt;Unconstrained&lt;int, int>></c->
 <c- k>auto</c-> <c- n>c4</c-> <c- o>=</c-> <c- n>make_unique</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- o>></c-><c- p>(</c-><c- mi>3</c-><c- p>,</c-> <c- mi>5</c-><c- p>);</c->   <c- c1>// Ill-formed instead of desired Conceptized&lt;int, int></c->
 </pre>
-   <p>Likewise, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf">ranges::to (P1206)</a> awkwardly relies on standard library containers only because they are unconstrained:</p>
+   <p>Likewise, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1206r1.pdf">ranges::to (P1206)</a> awkwardly relies on standard library containers being unconstrained:</p>
 <pre class="language-c++ highlight"><c- c1>// copy a list to a vector of the same type, deducing value_type</c->
 <c- n>Same</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>&lt;</c-><c- b>int</c-><c- o>>></c-> <c- k>auto</c-> <c- n>c</c-> <c- o>=</c-> <c- n>ranges</c-><c- o>::</c-><c- n>to</c-><c- o>&lt;</c-><c- n>std</c-><c- o>::</c-><c- n>vector</c-><c- o>></c-><c- p>(</c-><c- n>l</c-><c- p>);</c-> <c- c1>// OK, vector is not concept-constrained</c->
 </pre>
