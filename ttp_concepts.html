@@ -1472,9 +1472,9 @@ pre .property::before, pre .property::after {
    <ol class="toc" role="directory">
     <li><a href="#problem"><span class="secno">1</span> <span class="content">The problem</span></a>
     <li><a href="#solution"><span class="secno">2</span> <span class="content">The solution</span></a>
-    <li><a href="#faq1"><span class="secno">3</span> <span class="content">Why not create a new notation?</span></a>
-    <li><a href="#faq2"><span class="secno">4</span> <span class="content">What if we want to only match unconstrained templates?</span></a>
-    <li><a href="#faq3"><span class="secno">5</span> <span class="content">What about more general template parameters?</span></a>
+    <li><a href="#faq0"><span class="secno">3</span> <span class="content">Without a language change, can we accept a general template as a template template parameter?</span></a>
+    <li><a href="#faq1"><span class="secno">4</span> <span class="content">Why not create a new notation that matches any template?</span></a>
+    <li><a href="#faq2"><span class="secno">5</span> <span class="content">What if we want to only match unconstrained templates?</span></a>
    </ol>
   </nav>
   <main>
@@ -1536,7 +1536,10 @@ template parameter match concept-constrained classes. E.g.,
 <pre class="language-c++ highlight"><c- c1>// Proposed: Ill-formed with concept violation as desired</c->
 <c- n>copy_tuple_args</c-><c- o>&lt;</c-><c- n>tuple</c-><c- o>&lt;</c-><c- b>int</c-><c- p>,</c-> <c- b>char</c-> <c- o>*></c-><c- p>,</c-> <c- n>Conceptized</c-><c- o>></c-> <c- n>c5</c-><c- p>;</c-> 
 </pre>
-   <h2 class="heading settled" data-level="3" id="faq1"><span class="secno">3. </span><span class="content">Why not create a new notation?</span><a class="self-link" href="#faq1"></a></h2>
+   <h2 class="heading settled" data-level="3" id="faq0"><span class="secno">3. </span><span class="content">Without a language change, can we accept a general template as a template template parameter?</span><a class="self-link" href="#faq0"></a></h2>
+    As far as we can tell, you can’t. So use cases like the above are simply impossible. (Did we
+miss something? We’d love to be proven wrong). 
+   <h2 class="heading settled" data-level="4" id="faq1"><span class="secno">4. </span><span class="content">Why not create a new notation that matches any template?</span><a class="self-link" href="#faq1"></a></h2>
     While one could imagine some new notation for template template parameters
 that works with and without constraints, we believe that would still be an unsatisfactory solution
 for the following reasons 
@@ -1546,24 +1549,19 @@ for the following reasons
     <li data-md>
      <p>Teachers will have to teach the subtle point that any constrained class that might ever need to match a template template parameter should be SFINAE constrained rather than concept-constrained. We would much rather stop teaching SFINAE altogether instead of a new subtlety...</p>
     <li data-md>
-     <p>A new notation could not be added before C++23. Our proposal could easily apply to C++20 as a wording fix to Concepts</p>
+     <p>A new notation could likely not be added before C++23. Our proposal could easily apply to C++20 as a wording fix to Concepts.</p>
    </ul>
-   <h2 class="heading settled" data-level="4" id="faq2"><span class="secno">4. </span><span class="content">What if we want to only match unconstrained templates?</span><a class="self-link" href="#faq2"></a></h2>
-    We are unaware of use cases for this in contrast to the significant use cases for this proposal. However, 
-note that natural notations could easily be developed and added. For example, 
-<pre class="language-c++ highlight"><c- n>template</c-><c- o>&lt;</c-><c- n>template</c-><c- o>&lt;</c-><c- n>class</c-><c- p>,</c-> <c- n>class</c-><c- o>></c-> <c- n>requires</c-> <c- p>{}</c-><c- o>></c-> <c- c1>// Not proposed at this time</c->
+   <h2 class="heading settled" data-level="5" id="faq2"><span class="secno">5. </span><span class="content">What if we want to only match unconstrained templates?</span><a class="self-link" href="#faq2"></a></h2>
+    We are unaware of use cases for the current behavior of only matching unconstrained concepts
+(especially compared to the significant use cases for this proposal). However, 
+note that natural notations could easily be developed and added, e.g., by making the lack of constraints explicit: 
+<pre class="language-c++ highlight"><c- n>template</c-><c- o>&lt;</c-><c- n>template</c-><c- o>&lt;</c-><c- n>class</c-><c- p>,</c-> <c- n>class</c-><c- o>></c-> <c- n>requires</c-> <c- p>{}</c-> <c- n>class</c-> <c- n>X</c-><c- o>></c-> <c- c1>// Not proposed at this time</c->
 <c- n>class</c-> <c- n>OnlyMatchesUnconstrained</c-> <c- p>{};</c->
 
 <c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Unconstrained</c-><c- o>></c-> <c- n>u5</c-><c- p>;</c-> <c- c1>// OK</c->
-<c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c-> <c- c1>// OK</c->
-<c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c-> <c- c1>// Ill-formed as desired</c->
+<c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Sfinae</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c->        <c- c1>// OK</c->
+<c- n>OnlyMatchesUnconstrained</c-><c- o>&lt;</c-><c- n>Conceptized</c-><c- o>></c-> <c- n>s5</c-><c- p>;</c->   <c- c1>// Ill-formed as desired</c->
 </pre>
-   <h2 class="heading settled" data-level="5" id="faq3"><span class="secno">5. </span><span class="content">What about more general template parameters?</span><a class="self-link" href="#faq3"></a></h2>
-    This proposal only covers the requirements around unconstrained template
-template parameters. We are aware that various more general rules have been discussed
-for when a template argument should match a parameter, including some that would subsume
-this proposal.  This paper offers no opinion on such proposals as long as
-they allow the code examples above to behave as proposed. 
   </main>
 <script>
 (function() {

@@ -93,32 +93,31 @@ Note that violations of the constraints will still produce concept-aware error m
 // Proposed: Ill-formed with concept violation as desired
 copy_tuple_args<tuple<int, char *>, Conceptized> c5; 
 ```
-# Why not create a new notation? # {#faq1}
+# Without a language change, can we accept a general template as a template template parameter? # {#faq0}
+As far as we can tell, you can't. So use cases like the above are simply impossible. (Did we
+miss something? We'd love to be proven wrong).
+
+# Why not create a new notation that matches any template? # {#faq1}
 While one could imagine some new notation for template template parameters
 that works with and without constraints, we believe that would still be an unsatisfactory solution
 for the following reasons
 
 * All pre-C++20 template template parameters that were written in the past with the expectation that they would match any templates will fail to work with concept-constrained templates, discouraging existing code bases from conceptizing classes
 * Teachers will have to teach the subtle point that any constrained class that might ever need to match a template template parameter should be SFINAE constrained rather than concept-constrained. We would much rather stop teaching SFINAE altogether instead of a new subtlety...
-* A new notation could not be added before C++23. Our proposal could easily apply to C++20 as a wording fix to Concepts
+* A new notation could likely not be added before C++23. Our proposal could easily apply to C++20 as a wording fix to Concepts.
 
 # What if we want to only match unconstrained templates? # {#faq2}
-We are unaware of use cases for this in contrast to the significant use cases for this proposal. However, 
-note that natural notations could easily be developed and added. For example,
+We are unaware of use cases for the current behavior of only matching unconstrained concepts
+(especially compared to the significant use cases for this proposal). However, 
+note that natural notations could easily be developed and added, e.g., by making the lack of constraints explicit:
 
 ```c++
-template<template<class, class> requires {}> // Not proposed at this time
+template<template<class, class> requires {} class X> // Not proposed at this time
 class OnlyMatchesUnconstrained {};
 
 OnlyMatchesUnconstrained<Unconstrained> u5; // OK
-OnlyMatchesUnconstrained<Sfinae> s5; // OK
-OnlyMatchesUnconstrained<Conceptized> s5; // Ill-formed as desired
+OnlyMatchesUnconstrained<Sfinae> s5;        // OK
+OnlyMatchesUnconstrained<Conceptized> s5;   // Ill-formed as desired
 ```
-# What about more general template parameters? # {#faq3}
-This proposal only covers the requirements around unconstrained template
-template parameters. We are aware that various more general rules have been discussed
-for when a template argument should match a parameter, including some that would subsume
-this proposal.  This paper offers no opinion on such proposals as long as
-they allow the code examples above to behave as proposed.
 
 
